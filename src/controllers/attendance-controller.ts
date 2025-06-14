@@ -11,7 +11,7 @@ export const recordAttendance = async (
     const classId = req.params.id;
 
     for (const record of attendance) {
-      await Student.findByIdAndUpdate(record.studentId, {
+      await Student.findByIdAndUpdate(record.matricule, {
         $set: { [`attendance.${classId}`]: { present: record.present } },
       });
     }
@@ -33,7 +33,7 @@ export const getAttendanceByClass = async (
     });
     res.json(
       students.map((s) => ({
-        studentId: s._id,
+        matricule: s._id,
         //@ts-ignore
         present: s.attendance.get(req.params.id).present,
       }))
@@ -50,9 +50,15 @@ export const updateAttendanceStatus = async (
 ) => {
   try {
     const { present } = req.body;
-    await Student.findByIdAndUpdate(req.params.studentId, {
-      $set: { [`attendance.${req.params.id}`]: { present } },
-    });
+
+    await Student.findOneAndUpdate(
+      {
+        matricule: req.params.matricule,
+      },
+      {
+        $set: { [`attendance.${req.params.id}`]: { present } },
+      }
+    );
     res.json({ msg: "Attendance updated" });
   } catch (err) {
     next(err);

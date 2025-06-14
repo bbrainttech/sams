@@ -4,5 +4,5 @@ import * as attCtrl from "../controllers/attendance-controller";
 const router = Router({ mergeParams: true });
 router.patch("/", attCtrl.recordAttendance);
 router.get("/", attCtrl.getAttendanceByClass);
-router.patch("/:studentId", attCtrl.updateAttendanceStatus);
+router.patch("/:matricule", attCtrl.updateAttendanceStatus);
 export default router;

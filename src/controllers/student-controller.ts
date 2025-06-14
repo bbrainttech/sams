@@ -8,17 +8,17 @@ export const createStudent = async (
   next: NextFunction
 ) => {
   try {
-    const { name, studentId, photoUrl, classes, attendance } = req.body;
+    const { name, matricule, photoUrl, classes, attendance } = req.body;
 
     const classDocs = await Class.find({ _id: { $in: classes } });
-    if (classDocs.length !== classes.length) {
-      res.status(400).json({ msg: "One or more classes not found" });
-      return;
-    }
+    // if (classDocs.length !== classes.length) {
+    //   res.status(400).json({ msg: "One or more classes not found" });
+    //   return;
+    // }
 
     const student = await Student.create({
       name,
-      studentId,
+      matricule,
       photoUrl,
       classes,
       attendance,
