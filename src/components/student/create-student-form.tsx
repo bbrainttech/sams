@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
+import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { z } from "zod";
 import axios from "../../lib/axios";
@@ -25,7 +26,6 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import { Link } from "react-router-dom";
 
 const CreateStudentSchema = z.object({
   name: z.string().min(1),
@@ -70,14 +70,13 @@ export default function CreateStudentForm() {
     onSuccess: async () => {
       toast.success("Student created succesfully!!");
 
-      console.log(
-        form.getValues("classes").map((cls) => ["class-students", cls])
-      );
-      form.getValues("classes").map(
-        async (cls) =>
-          await queryClient.invalidateQueries({
-            queryKey: ["class-students", cls],
-          })
+      await Promise.all(
+        form.getValues("classes").map(
+          async (cls) =>
+            await queryClient.invalidateQueries({
+              queryKey: ["class-students", cls],
+            })
+        )
       );
     },
     onError: () => toast.error("Failed to created student!!"),

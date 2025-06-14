@@ -1,10 +1,10 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Loader2, XIcon } from "lucide-react";
+import { toast } from "sonner";
+import axios from "../../lib/axios";
 import { cn } from "../../lib/utils";
 import { Button } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import axios from "../../lib/axios";
-import { toast } from "sonner";
 
 interface ClassItemProps {
   _id: string;
@@ -26,7 +26,9 @@ export default function StudentItem({
   const { mutate, isPending } = useMutation({
     mutationFn: () => axios.delete(`/students/${_id}`),
     onSuccess: async () =>
-      await queryClient.invalidateQueries({ queryKey: ["class-students", cls] }),
+      await queryClient.invalidateQueries({
+        queryKey: ["class-students", cls],
+      }),
   });
 
   const { mutate: updateAtttendance } = useMutation<unknown, Error, boolean>({
@@ -44,7 +46,9 @@ export default function StudentItem({
         }
       ),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["class-students", cls] });
+      await queryClient.invalidateQueries({
+        queryKey: ["class-students", cls],
+      });
       toast.success("Student attendance updated");
     },
     onError: () => toast.error("Failed tp update student attendance"),
