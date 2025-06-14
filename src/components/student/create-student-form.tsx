@@ -25,14 +25,20 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Link } from "react-router-dom";
 
 const CreateStudentSchema = z.object({
   name: z.string().min(1),
   present: z.boolean(),
-  class: z.array(z.string()).min(1, "Please select at least one class"),
+  classes: z.array(z.string()).min(1, "Please select at least one class"),
   matricule: z.string().toLowerCase().min(8),
 });
 
+export interface IClassResponse {
+  _id: string;
+  title: string;
+  description?: string;
+}
 export type CreateStudentSchemaType = z.infer<typeof CreateStudentSchema>;
 export default function CreateStudentForm() {
   const form = useForm<CreateStudentSchemaType>({
@@ -40,16 +46,11 @@ export default function CreateStudentForm() {
       name: "",
       present: false,
       matricule: "",
-      class: [],
+      classes: [],
     },
     resolver: zodResolver(CreateStudentSchema),
   });
 
-  interface IClassResponse {
-    _id: string;
-    title: string;
-    description?: string;
-  }
   const { data } = useQuery<{
     data: IClassResponse[];
   }>({
@@ -74,8 +75,16 @@ export default function CreateStudentForm() {
   });
 
   const onSubmit = async (data: CreateStudentSchemaType) => {
-    console.log(data);
-    // mutate(data);
+    const attendance = data.classes.reduce((acc, id) => {
+      acc[id] = { present: data.present };
+      return acc;
+    }, {} as { [k: string]: { present: boolean } });
+
+    const payload = {
+      ...data,
+      attendance,
+    };
+    mutate(payload);
   };
 
   return (
@@ -109,7 +118,7 @@ export default function CreateStudentForm() {
             )}
           />
           <FormField
-            name="class"
+            name="classes"
             control={form.control}
             render={({ field }) => {
               return (
@@ -131,14 +140,29 @@ export default function CreateStudentForm() {
                           : "Select your classes"}
                       </span>
                     </PopoverTrigger>
-                    <PopoverContent align="end" className="w-[--radix-popover-content-width] p-0 ">
+                    <PopoverContent
+                      align="end"
+                      className="w-[28rem] max-w-full p-0 "
+                    >
                       <Command>
                         <CommandInput
                           placeholder="Search claesses"
                           className="h-9"
                         />
                         <CommandList small-scroll-bar="">
-                          <CommandEmpty>No class found.</CommandEmpty>
+                          <CommandEmpty className="flex flex-col gap-3 justify-center text-center p-4">
+                            <span className="text-muted-foreground">
+                              No class found.
+                            </span>
+                            <Link
+                              to={"/class"}
+                              className={buttonVariants({
+                                variant: "secondary",
+                              })}
+                            >
+                              Create a class
+                            </Link>
+                          </CommandEmpty>
                           <CommandGroup>
                             {classes.map(({ _id, title }) => {
                               return (
