@@ -19,15 +19,14 @@ export default function StudentItem({
   _id,
   present,
   name,
-  class:cls,
+  class: cls,
   matricule,
 }: ClassItemProps) {
-  
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: () => axios.delete(`/students/${_id}`),
     onSuccess: async () =>
-      await queryClient.invalidateQueries({ queryKey: ["students"] }),
+      await queryClient.invalidateQueries({ queryKey: ["class-students", cls] }),
   });
 
   const { mutate: updateAtttendance } = useMutation<unknown, Error, boolean>({
@@ -45,7 +44,7 @@ export default function StudentItem({
         }
       ),
     onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["students"] });
+      await queryClient.invalidateQueries({ queryKey: ["class-students", cls] });
       toast.success("Student attendance updated");
     },
     onError: () => toast.error("Failed tp update student attendance"),

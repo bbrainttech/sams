@@ -78,9 +78,14 @@ export default function ClassList() {
               ))}
         </DropdownMenuContent>
       </DropdownMenu>
-      {studs.map((stud) => (
-        <StudentItem key={stud?._id} {...stud} />
-      ))}
+
+      {studs.length == 0 ? (
+        <div className="text-center py-10  text-muted-foreground">
+          <span>No students in this class</span>
+        </div>
+      ) : (
+        studs.map((stud) => <StudentItem key={stud?._id} {...stud} />)
+      )}
     </section>
   );
 }

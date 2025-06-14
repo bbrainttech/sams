@@ -69,7 +69,16 @@ export default function CreateStudentForm() {
     mutationFn: (payload) => axios.post("/students", payload),
     onSuccess: async () => {
       toast.success("Student created succesfully!!");
-      await queryClient.invalidateQueries({ queryKey: ["students"] });
+
+      console.log(
+        form.getValues("classes").map((cls) => ["class-students", cls])
+      );
+      form.getValues("classes").map(
+        async (cls) =>
+          await queryClient.invalidateQueries({
+            queryKey: ["class-students", cls],
+          })
+      );
     },
     onError: () => toast.error("Failed to created student!!"),
   });
