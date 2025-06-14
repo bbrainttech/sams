@@ -48,15 +48,41 @@ export const getStudents = async (
     next(err);
   }
 };
-
 export const getStudentById = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const student = await Student.findById(req.params.id).populate("classes");
-    res.json(student);
+    const student = await Student.findById(req.params.id)
+      .populate({
+        path: "classes",
+        populate: {
+          path: "students",
+          select: "name matricule photoUrl",
+        },
+      })
+      .lean(); 
+
+    if (!student) {
+      res.status(404).json({ msg: "Student not found" });
+
+      return;
+    }
+
+    const attendanceMap = student.attendance || {};
+    const updatedClasses = student.classes.map((cls: any) => {
+      const present = attendanceMap[cls._id.toString()]?.present ?? false;
+      return {
+        ...cls,
+        attendance: { present },
+      };
+    });
+
+    res.json({
+      ...student,
+      classes: updatedClasses,
+    });
   } catch (err) {
     next(err);
   }

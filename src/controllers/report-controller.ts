@@ -28,12 +28,11 @@ export const studentReport = async (
   try {
     const records = await Attendance.find({
       "attendance.student": req.params.id,
-    }).populate("class");
+    }).populate("class")
     const history = records.map((r) => ({
       class: (r.class as any).title,
       date: (r.class as any).date,
-      status: r.attendance.find((a) => a.student.toString() === req.params.id)
-        ?.status,
+      status: r.attendance.find((a) => a.student.toString() === req.params.id),
     }));
     res.json(history);
   } catch (err) {
