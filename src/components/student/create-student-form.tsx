@@ -1,10 +1,20 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import axios from "../../lib/axios";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { Checkbox } from "../ui/checkbox";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "../ui/command";
 import {
   Form,
   FormControl,
@@ -14,24 +24,12 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-
-const createStudent = async (payload: { name: string; matricule: string }) => {
-  await axios.post("/students", payload);
-
-  toast.success("Student created succesfully!!");
-};
+import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
 
 const CreateStudentSchema = z.object({
   name: z.string().min(1),
   present: z.boolean(),
-  class: z.string().min(20),
+  class: z.array(z.string()).min(1, "Please select at least one class"),
   matricule: z.string().toLowerCase().min(8),
 });
 
@@ -42,13 +40,44 @@ export default function CreateStudentForm() {
       name: "",
       present: false,
       matricule: "",
+      class: [],
     },
     resolver: zodResolver(CreateStudentSchema),
   });
 
+  interface IClassResponse {
+    _id: string;
+    title: string;
+    description?: string;
+  }
+  const { data } = useQuery<{
+    data: IClassResponse[];
+  }>({
+    queryKey: ["classes"],
+    queryFn: () => axios.get("/classes"),
+  });
+
+  const classes = data?.data || [];
+
+  const queryClient = useQueryClient();
+  const { mutate, isPending, isError } = useMutation<
+    unknown,
+    Error,
+    CreateStudentSchemaType
+  >({
+    mutationFn: (payload) => axios.post("/students", payload),
+    onSuccess: async () => {
+      toast.success("Student created succesfully!!");
+      await queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
+    onError: () => toast.error("Failed to created student!!"),
+  });
+
   const onSubmit = async (data: CreateStudentSchemaType) => {
-    await createStudent(data);
+    console.log(data);
+    // mutate(data);
   };
+
   return (
     <section className="animate-in fade-in slide-in-from-bottom-5 duration-300 zoom-in-95">
       <Form {...form}>
@@ -82,25 +111,67 @@ export default function CreateStudentForm() {
           <FormField
             name="class"
             control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Select class</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select your class from the list" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="cec430">CEC430</SelectItem>
-                  </SelectContent>
-                </Select>
-              </FormItem>
-            )}
+            render={({ field }) => {
+              return (
+                <FormItem className="justify-between items-center flex">
+                  <Popover>
+                    <PopoverTrigger
+                      role="combobox"
+                      className={buttonVariants({
+                        size: "sm",
+                        variant: "outline",
+                        className:
+                          "w-full " +
+                          (classes.length < 1 ? " text-muted-foreground" : ""),
+                      })}
+                    >
+                      <span>
+                        {field.value.length > 0
+                          ? field.value.length + " selected"
+                          : "Select your classes"}
+                      </span>
+                    </PopoverTrigger>
+                    <PopoverContent align="end" className="w-[--radix-popover-content-width] p-0 ">
+                      <Command>
+                        <CommandInput
+                          placeholder="Search claesses"
+                          className="h-9"
+                        />
+                        <CommandList small-scroll-bar="">
+                          <CommandEmpty>No class found.</CommandEmpty>
+                          <CommandGroup>
+                            {classes.map(({ _id, title }) => {
+                              return (
+                                <CommandItem
+                                  key={_id}
+                                  value={_id}
+                                  onSelect={() => {
+                                    const selected = !field.value.includes(_id)
+                                      ? [...field.value, _id]
+                                      : field.value.filter((id) => id !== _id);
+
+                                    field.onChange(selected);
+                                  }}
+                                  className="group/cmd-item text-sm capitalize"
+                                >
+                                  <Checkbox
+                                    checked={field.value.includes(_id)}
+                                  />
+
+                                  <span className="capitalize">{title}</span>
+                                </CommandItem>
+                              );
+                            })}
+                          </CommandGroup>
+                        </CommandList>
+                      </Command>
+                    </PopoverContent>
+                  </Popover>
+                </FormItem>
+              );
+            }}
           />
+
           <FormField
             name="present"
             control={form.control}
@@ -117,7 +188,16 @@ export default function CreateStudentForm() {
               </FormItem>
             )}
           />
-          <Button>Create student</Button>
+          <Button
+            variant={isError ? "destructive" : "default"}
+            disabled={isPending}
+          >
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : (
+              "Create student"
+            )}
+          </Button>
         </form>
       </Form>
     </section>

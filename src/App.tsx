@@ -1,8 +1,8 @@
 import { useState } from "react";
-import CreateClassForm from "./components/class/create-class-form";
-import { Button } from "./components/ui/button";
-import CreateStudentForm from "./components/student/create-student-form";
+import { Link } from "react-router-dom";
 import ClassList from "./components/class/class-list";
+import CreateStudentForm from "./components/student/create-student-form";
+import { Button, buttonVariants } from "./components/ui/button";
 
 function App() {
   const [showForm, setShowForm] = useState(false);
@@ -12,6 +12,12 @@ function App() {
         <div className="flex my-4 justify-between">
           <h1 className="font-bold text-2xl">Class list</h1>
           <div className="flex gap-2">
+            <Link
+              to={"/class"}
+              className={buttonVariants({ variant: "secondary" })}
+            >
+              Create class
+            </Link>
             {!showForm && (
               <Button onClick={() => setShowForm(true)}>Add</Button>
             )}
@@ -24,7 +30,6 @@ function App() {
         {showForm && <CreateStudentForm />}
 
         <ClassList />
-        {/* <CreateClassForm /> */}
       </div>
     </section>
   );

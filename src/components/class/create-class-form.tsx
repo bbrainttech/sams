@@ -1,10 +1,12 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import axios from "../../lib/axios";
 import { cn } from "../../lib/utils";
-import { Button } from "../ui/button";
+import { Button, buttonVariants } from "../ui/button";
 import { Calendar } from "../ui/calendar";
 import {
   Form,
@@ -16,12 +18,9 @@ import {
 } from "../ui/form";
 import { Input } from "../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
-import axios from "../../lib/axios";
 import { Textarea } from "../ui/textarea";
-
-const createClass = async (payload: { title: string; date?: string }) => {
-  await axios.post("/classes", payload);
-};
+import { toast } from "sonner";
+import { Link } from "react-router-dom";
 
 const CreateClassSchema = z.object({
   title: z.string().min(1),
@@ -40,10 +39,18 @@ export default function CreateClassForm() {
     resolver: zodResolver(CreateClassSchema),
   });
 
-  const onSubmit = async (data: CreateClassSchemaType) => {
-    console.log(data);
+  const { mutate, isPending, isError } = useMutation<
+    unknown,
+    Error,
+    { date: string; title: string; description?: string }
+  >({
+    mutationFn: (payload) => axios.post("/classes", payload),
+    onSuccess: () => toast.success("Class created successfully!!"),
+    onError: () => toast.error("Failed to create class"),
+  });
 
-    await createClass({
+  const onSubmit = async (data: CreateClassSchemaType) => {
+    mutate({
       ...data,
       date: data.data.toISOString(),
     });
@@ -51,6 +58,7 @@ export default function CreateClassForm() {
 
   return (
     <section>
+      <div className="font-medium my-3">Create a new class</div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4">
           <FormField
@@ -120,7 +128,21 @@ export default function CreateClassForm() {
               </FormItem>
             )}
           />
-          <Button> Create class </Button>
+          <Button
+            disabled={isPending}
+            variant={isError ? "destructive" : "default"}
+          >
+            {isPending ? (
+              <Loader2 className="animate-spin" />
+            ) : isError ? (
+              "Try again"
+            ) : (
+              "Create class"
+            )}
+          </Button>
+          <Link to={"/"} className={buttonVariants({ variant: "secondary" })}>
+            &larr; Back home
+          </Link>
         </form>
       </Form>
     </section>
