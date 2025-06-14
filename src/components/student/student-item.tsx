@@ -10,7 +10,7 @@ interface ClassItemProps {
   _id: string;
 
   present: boolean;
-
+  class: string;
   name: string;
   matricule: string;
 }
@@ -19,8 +19,10 @@ export default function StudentItem({
   _id,
   present,
   name,
+  class:cls,
   matricule,
 }: ClassItemProps) {
+  
   const queryClient = useQueryClient();
   const { mutate, isPending } = useMutation({
     mutationFn: () => axios.delete(`/students/${_id}`),
@@ -31,7 +33,7 @@ export default function StudentItem({
   const { mutate: updateAtttendance } = useMutation<unknown, Error, boolean>({
     mutationFn: (p) =>
       axios.patch(
-        `/`,
+        `/classes/${cls}/attendance/${matricule}`,
         {
           present: p,
         },

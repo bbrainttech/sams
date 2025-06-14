@@ -39,6 +39,7 @@ export default function ClassList() {
     data: {
       _id: string;
       name: string;
+      class: string;
       matricule: string;
       present: boolean;
     }[];
@@ -49,6 +50,7 @@ export default function ClassList() {
   });
   const studs = classesData?.data || [];
 
+  console.log(studs);
   return (
     <section className=" mt-10 animate-in fade-in duration-300 grid gap-2">
       <DropdownMenu>
