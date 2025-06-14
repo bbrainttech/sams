@@ -130,7 +130,7 @@ export default function CreateStudentForm() {
             control={form.control}
             render={({ field }) => {
               return (
-                <FormItem className="justify-between items-center flex">
+                <FormItem className="">
                   <Popover>
                     <PopoverTrigger
                       role="combobox"
@@ -199,6 +199,7 @@ export default function CreateStudentForm() {
                       </Command>
                     </PopoverContent>
                   </Popover>
+                  <FormMessage />
                 </FormItem>
               );
             }}

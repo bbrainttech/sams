@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { Loader2 } from "lucide-react";
 import { useState } from "react";
 import axios from "../../lib/axios";
 import type { IClassResponse } from "../student/create-student-form";
@@ -35,7 +36,7 @@ export default function ClassList() {
     availableClasses?.[0]?._id
   );
 
-  const { data: classesData } = useQuery<{
+  const { data: classesData, isPending: isclassStudentsLoading } = useQuery<{
     data: {
       _id: string;
       name: string;
@@ -63,23 +64,36 @@ export default function ClassList() {
             : "Select class"}
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          {isPending
-            ? "Loading classes"
-            : isError
-            ? ""
-            : availableClasses?.map((cls) => (
-                <DropdownMenuCheckboxItem
-                  onCheckedChange={() => setCurrentClass(cls._id)}
-                  key={cls?._id}
-                  checked={currentClass === cls?._id}
-                >
-                  {cls.title}
-                </DropdownMenuCheckboxItem>
-              ))}
+          {isPending ? (
+            <div className="flex items-center gap-2 p-4">
+              <Loader2 className="animate-spin" /> Loading classes
+            </div>
+          ) : isError ? (
+            ""
+          ) : (
+            availableClasses?.map((cls) => (
+              <DropdownMenuCheckboxItem
+                onCheckedChange={() => setCurrentClass(cls._id)}
+                key={cls?._id}
+                checked={currentClass === cls?._id}
+              >
+                {cls.title}
+              </DropdownMenuCheckboxItem>
+            ))
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
 
-      {studs.length == 0 ? (
+      {!currentClass ? (
+        <div className="p-10 flex items-center gap-2 text-muted-foreground justify-center text-center">
+          <span>Select a class to its students</span>
+        </div>
+      ) : isclassStudentsLoading ? (
+        <div className="p-10 flex items-center gap-2 text-muted-foreground justify-center text-center">
+          <Loader2 className="animate-spin size-4" />
+          <span>Loading students for this class</span>
+        </div>
+      ) : studs.length == 0 ? (
         <div className="text-center py-10  text-muted-foreground">
           <span>No students in this class</span>
         </div>

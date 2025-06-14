@@ -10,7 +10,7 @@ function App() {
     <section>
       <div className="container py-20 max-w-lg">
         <div className="flex my-4 justify-between">
-          <h1 className="font-bold text-2xl">Class list</h1>
+          <h1 className="font-bold text-2xl">Student form</h1>
           <div className="flex gap-2">
             <Link
               to={"/class"}
