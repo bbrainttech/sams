@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import ClassModel, { IClass } from "../models/class";
+import Class from "../models/class";
 
 export const createClass = async (
   req: Request,
@@ -7,7 +7,7 @@ export const createClass = async (
   next: NextFunction
 ) => {
   try {
-    const cls: IClass = await ClassModel.create(req.body);
+    const cls = await Class.create(req.body);
     res.status(201).json(cls);
   } catch (err) {
     next(err);
@@ -20,7 +20,7 @@ export const getClasses = async (
   next: NextFunction
 ) => {
   try {
-    const classes = await ClassModel.find();
+    const classes = await Class.find().populate("students");
     res.json(classes);
   } catch (err) {
     next(err);
@@ -33,40 +33,21 @@ export const getClassById = async (
   next: NextFunction
 ) => {
   try {
-    const cls = await ClassModel.findById(req.params.id);
-    if (!cls) {
-      res.status(404).json({ msg: "Class not found" });
-      return;
-    }
+    const cls = await Class.findById(req.params.id).populate("students");
     res.json(cls);
   } catch (err) {
     next(err);
   }
 };
 
-export const updateClass = async (
+export const getClassStudents = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const cls = await ClassModel.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
-    res.json(cls);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const deleteClass = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    await ClassModel.findByIdAndDelete(req.params.id);
-    res.json({ msg: "Class removed" });
+    const cls = await Class.findById(req.params.id).populate("students");
+    res.json(cls?.students || []);
   } catch (err) {
     next(err);
   }

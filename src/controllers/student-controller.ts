@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
-import Student, { IStudent } from "../models/student";
+import Class from "../models/class";
+import Student from "../models/student";
 
 export const createStudent = async (
   req: Request,
@@ -7,13 +8,30 @@ export const createStudent = async (
   next: NextFunction
 ) => {
   try {
-    const student: IStudent = await Student.create({
-      ...req.body,
-      matricule: req.body.matricule.toLowerCase(),
+    const { name, studentId, photoUrl, classes, attendance } = req.body;
+
+    const classDocs = await Class.find({ _id: { $in: classes } });
+    if (classDocs.length !== classes.length) {
+      res.status(400).json({ msg: "One or more classes not found" });
+      return;
+    }
+
+    const student = await Student.create({
+      name,
+      studentId,
+      photoUrl,
+      classes,
+      attendance,
     });
+
+    for (const classDoc of classDocs) {
+      //@ts-ignore
+      classDoc.students.push(student._id);
+      await classDoc.save();
+    }
+
     res.status(201).json(student);
   } catch (err) {
-    res.status(500).json({ msg: "Failded to create student" });
     next(err);
   }
 };
@@ -24,7 +42,7 @@ export const getStudents = async (
   next: NextFunction
 ) => {
   try {
-    const students = await Student.find();
+    const students = await Student.find().populate("classes");
     res.json(students);
   } catch (err) {
     next(err);
@@ -37,26 +55,7 @@ export const getStudentById = async (
   next: NextFunction
 ) => {
   try {
-    const student = await Student.findById(req.params.id);
-    if (!student) {
-      res.status(404).json({ msg: "Student not found" });
-      return;
-    }
-    res.json(student);
-  } catch (err) {
-    next(err);
-  }
-};
-
-export const updateStudent = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const student = await Student.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-    });
+    const student = await Student.findById(req.params.id).populate("classes");
     res.json(student);
   } catch (err) {
     next(err);
@@ -69,8 +68,21 @@ export const deleteStudent = async (
   next: NextFunction
 ) => {
   try {
-    await Student.findByIdAndDelete(req.params.id);
-    res.json({ msg: "Student removed" });
+    const student = await Student.findById(req.params.id);
+    if (!student) {
+      res.status(404).json({ msg: "Student not found" });
+      return;
+    }
+
+    const classIds = student.classes;
+    for (const classId of classIds) {
+      await Class.findByIdAndUpdate(classId, {
+        $pull: { students: student._id },
+      });
+    }
+
+    await student.deleteOne();
+    res.json({ msg: "Student deleted and removed from all classes" });
   } catch (err) {
     next(err);
   }

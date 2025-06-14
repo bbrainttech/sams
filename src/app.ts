@@ -11,8 +11,8 @@ connectDB();
 
 const app = express();
 app.use(express.json());
-
 app.use(cors());
+
 app.use("/api/students", studentRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/classes/:id/attendance", attendanceRoutes);

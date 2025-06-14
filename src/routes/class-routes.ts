@@ -5,6 +5,5 @@ const router = Router();
 router.post("/", classCtrl.createClass);
 router.get("/", classCtrl.getClasses);
 router.get("/:id", classCtrl.getClassById);
-router.patch("/:id", classCtrl.updateClass);
-router.delete("/:id", classCtrl.deleteClass);
+router.get("/:id/students", classCtrl.getClassStudents);
 export default router;
