@@ -4,14 +4,14 @@ export interface IStudent extends Document {
   name: string;
   matricule: string;
   photoUrl?: string;
-  // class: Types.ObjectId | IClass;
+  classes: Schema.Types.ObjectId;
 }
 
 const StudentSchema = new Schema<IStudent>(
   {
     name: { type: String, required: true },
     matricule: { type: String, required: true, unique: true },
-    // class: { type: Schema.Types.ObjectId, ref: "Class", required: true },
+    classes: [{ type: Schema.Types.ObjectId, ref: "Class", required: true }],
     photoUrl: String,
   },
   { timestamps: true }
