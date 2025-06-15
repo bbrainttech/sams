@@ -49,7 +49,7 @@ export default function CreateClassForm() {
     onError: () => toast.error("Failed to create class"),
   });
 
-  const onSubmit = async (data: CreateClassSchemaType) => {
+  const onSubmit = (data: CreateClassSchemaType) => {
     mutate({
       ...data,
       date: data.data.toISOString(),

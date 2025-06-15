@@ -9,7 +9,6 @@ import { Link } from "react-router-dom";
 
 interface ClassItemProps {
   _id: string;
-
   present: boolean;
   class: string;
   name: string;

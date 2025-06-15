@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { Link, useParams } from "react-router-dom";
-import axios from "../lib/axios";
 import { Loader2 } from "lucide-react";
-import StudentItem from "../components/student/student-item";
+import { Link, useParams } from "react-router-dom";
 import type { IStudent } from "../components/class/class-list";
+import StudentItem from "../components/student/student-item";
 import { buttonVariants } from "../components/ui/button";
+import axios from "../lib/axios";
 
 type ReportClass = IClass & {
   attendance: { present: boolean };
@@ -48,15 +48,14 @@ export default function StudentReportPage() {
 
   if (isPending) {
     return (
-      <div>
-        <Loader2 className="animate-spin" />
+      <div className="mx-auto max-w-fit flex items-center flex-col gap-4">
+        <Loader2 className="animate-spin size-9" />
         <span>Loading student report</span>
       </div>
     );
   }
 
   const report = data?.data;
-  console.log(report);
 
   if (!report)
     return (
@@ -68,16 +67,6 @@ export default function StudentReportPage() {
       </div>
     );
 
-  // const attendance = report?.classes.map((cls) => {
-  //   const match = Object.entries(report.attendance).find(
-  //     ([key, _]) => key === cls._id
-  //   );
-
-  //   return {
-  //     ...cls,
-  //     match: match?.[1],
-  //   };
-  // });
   return (
     <div className="mx-auto max-w-md flex flex-col">
       <h1 className="text-muted-foreground">Student</h1>
@@ -93,10 +82,20 @@ export default function StudentReportPage() {
       </div>
 
       <div className="mt-5">
-        <span className="text-muted-foreground">Class attendance</span>
+        <div className="flex justify-between">
+          <span className="text-muted-foreground">Class attendance</span>
+          <div className="flex items-center gap-x-2">
+            <span>Presence:</span>
+            <span>
+              {
+                report.classes
+                  .filter((c) => c.attendance.present)
+                  .flatMap((cls) => cls.students.length).length
+              }
+            </span>
+          </div>
+        </div>
         <div className="divide-y [&>div]:py-2.5">
-          {/* {JSON.stringify(report?.classes)} */}
-
           {report?.classes.map((cls) => (
             <div>
               {cls.title} :{" "}

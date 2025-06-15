@@ -98,17 +98,19 @@ export default function ClassReportPage() {
 
           {report?.classes.map((cls) => (
             <div>
-              {cls.title} :{" "}
-              {cls.students
-                .filter((student) => student._id === id)
-                .map((std) => (
-                  <StudentItem
-                    key={std._id}
-                    present={cls.attendance.present}
-                    class={cls._id}
-                    {...std}
-                  />
-                ))}
+              <span className="mb-2">{cls.title} : </span>
+              <div className="!mt-3">
+                {cls.students
+                  .filter((student) => student._id === id)
+                  .map((std) => (
+                    <StudentItem
+                      key={std._id}
+                      present={cls.attendance.present}
+                      class={cls._id}
+                      {...std}
+                    />
+                  ))}
+              </div>
             </div>
           ))}
         </div>

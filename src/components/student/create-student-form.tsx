@@ -71,11 +71,10 @@ export default function CreateStudentForm() {
       toast.success("Student created succesfully!!");
 
       await Promise.all(
-        form.getValues("classes").map(
-          async (cls) =>
-            await queryClient.invalidateQueries({
-              queryKey: ["class-students", cls],
-            })
+        form.getValues("classes").map((cls) =>
+          queryClient.invalidateQueries({
+            queryKey: ["class-students", cls],
+          })
         )
       );
     },

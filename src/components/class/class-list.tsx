@@ -54,6 +54,7 @@ export default function ClassList() {
   console.log(studs);
   return (
     <section className=" mt-10 animate-in fade-in duration-300 grid gap-2">
+      <div className="font-medium text-lg">Class list</div>
       <DropdownMenu>
         <DropdownMenuTrigger
           className={buttonVariants({ variant: "secondary" })}
@@ -86,7 +87,7 @@ export default function ClassList() {
 
       {!currentClass ? (
         <div className="p-10 flex items-center gap-2 text-muted-foreground justify-center text-center">
-          <span>Select a class to its students</span>
+          <span>Select a class to list its students</span>
         </div>
       ) : isclassStudentsLoading ? (
         <div className="p-10 flex items-center gap-2 text-muted-foreground justify-center text-center">

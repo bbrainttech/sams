@@ -19,7 +19,7 @@ function App() {
               Create class
             </Link>
             {!showForm && (
-              <Button onClick={() => setShowForm(true)}>Add</Button>
+              <Button onClick={() => setShowForm(true)}>Add student</Button>
             )}
             {showForm && (
               <Button onClick={() => setShowForm(false)}>Cancel</Button>
