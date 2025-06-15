@@ -11,9 +11,12 @@ export const recordAttendance = async (
     const classId = req.params.id;
 
     for (const record of attendance) {
-      await Student.findByIdAndUpdate(record.matricule, {
-        $set: { [`attendance.${classId}`]: { present: record.present } },
-      });
+      await Student.findOneAndUpdate(
+        { matricule: record.matricule },
+        {
+          $set: { [`attendance.${classId}`]: { present: record.present } },
+        }
+      );
     }
 
     res.json({ msg: "Attendance recorded" });
